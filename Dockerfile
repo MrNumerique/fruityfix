@@ -6,6 +6,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+ENV NEXT_TURBOPACK=0
 RUN npm run build
 
 EXPOSE 3000
