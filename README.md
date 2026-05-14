@@ -1,37 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# FruityFix
 
-## Getting Started
+Jeu de plateau sur la culture numérique, conçu pour tourner en local sur un **Raspberry Pi** sans connexion internet.
 
+Les joueurs évoluent sur un plateau physique et scannent des QR codes qui déclenchent des défis interactifs sur leur téléphone. Un animateur gère la partie depuis l'interface admin.
 
-First, run the development server:
+---
+
+## Stack
+
+- [Next.js 15](https://nextjs.org) (App Router) + React 19
+- Tailwind CSS v4
+- Persistance JSON locale (pas de base de données)
+- Docker — image publiée sur GHCR via GitHub Actions
+
+## Lancer en développement
 
 ```bash
+cd fruityfix
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+L'application est accessible sur [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Build Docker
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+docker build -t fruityfix .
+docker run -p 3000:3000 fruityfix
+```
 
-## Learn More
+L'image est également buildée et publiée automatiquement sur GHCR à chaque push sur `main`.
 
-To learn more about Next.js, take a look at the following resources:
+## Déploiement sur Raspberry Pi
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Configurer le Pi en point d'accès WiFi
+2. Installer Docker sur le Pi
+3. Puller et lancer l'image :
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker pull ghcr.io/<owner>/fruityfix:latest
+docker run -d -p 80:3000 --restart unless-stopped ghcr.io/<owner>/fruityfix:latest
+```
 
-## Deploy on Vercel
+4. Les joueurs se connectent au WiFi du Pi et ouvrent le navigateur — aucune connexion internet requise.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/app/
+├── page.js              → Accueil / sélection du joueur
+├── game/                → Vue joueur (scores, état de partie)
+├── defi/[slug]/         → Pages de défis (déclenchées par QR code)
+├── admin/               → Interface admin (gestion joueurs & points)
+└── api/                 → Routes API (état, scores, défis)
+
+data/
+├── game.json            → État de la partie en cours
+└── defis/               → Fichiers de configuration des défis
+```
+
+## Avancement
+
+Voir [ROADMAP.md](./ROADMAP.md).
